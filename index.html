@@ -1,0 +1,2383 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Innovest 401(k) Fee Projector</title>
+  <style>
+    :root {
+      --bg: #fafaf7;
+      --surface: #ffffff;
+      --surface-soft: #f8f8f6;
+      --ink: #504D51;
+      --ink-strong: #221f23;
+      --ink-soft: #6e6c70;
+      --ink-faint: #8f8c91;
+      --rule: #e3e1e2;
+      --rule-strong: #cfccce;
+      --bronze: #AF6828;
+      --bronze-dark: #8D5218;
+      --bronze-light: #C98942;
+      --teal: #008991;
+      --teal-dark: #006B71;
+      --teal-light: #00A4AC;
+      --gray-plan: #7A767B;
+      --gray-plan-soft: #B8B3B7;
+      --gray-plan-dark: #5f5b60;
+      --lime: #A5B438;
+      --lime-dark: #7d8a21;
+      --tan: #D7B393;
+      --danger: #a8301f;
+      --shadow: 0 1px 2px rgba(80, 77, 81, .05), 0 8px 24px rgba(80, 77, 81, .08);
+      --shadow-sm: 0 1px 2px rgba(80, 77, 81, .06);
+      --radius: 8px;
+      --font: Calibri, Carlito, "Segoe UI", "Trebuchet MS", Arial, sans-serif;
+      color-scheme: light;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-width: 320px;
+      background: var(--bg);
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, rgba(175, 104, 40, .05), transparent 320px),
+        var(--bg);
+      font-family: var(--font);
+      font-size: 14px;
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app-shell {
+      width: min(1440px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 24px 0 48px;
+    }
+
+    .masthead {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 24px;
+      align-items: end;
+      padding: 22px 0 18px;
+      border-bottom: 2px solid var(--ink);
+      margin-bottom: 18px;
+    }
+
+    .eyebrow {
+      margin: 0 0 6px;
+      color: var(--bronze);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      margin-bottom: 6px;
+      color: var(--ink-strong);
+      font-size: 34px;
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .lede {
+      max-width: 830px;
+      margin-bottom: 0;
+      color: var(--ink-soft);
+      font-size: 15px;
+    }
+
+    .masthead-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .btn {
+      display: inline-flex;
+      min-height: 36px;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: 1px solid var(--rule-strong);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--ink);
+      padding: 8px 12px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: border-color .16s ease, color .16s ease, background .16s ease, box-shadow .16s ease;
+    }
+
+    .btn:hover {
+      border-color: var(--bronze);
+      color: var(--bronze-dark);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn.primary {
+      border-color: var(--bronze);
+      background: var(--bronze);
+      color: #ffffff;
+    }
+
+    .btn.primary:hover {
+      border-color: var(--bronze-dark);
+      background: var(--bronze-dark);
+      color: #ffffff;
+    }
+
+    .btn.icon-only {
+      width: 34px;
+      min-height: 34px;
+      padding: 0;
+    }
+
+    .btn.danger:hover {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .icon {
+      width: 16px;
+      height: 16px;
+      display: inline-block;
+      flex: 0 0 auto;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 360px minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel,
+    .chart-panel {
+      border: 1px solid var(--rule);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .panel {
+      overflow: clip;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--rule);
+      background: rgba(80, 77, 81, .025);
+    }
+
+    .panel-title {
+      margin: 0;
+      color: var(--ink-strong);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .panel-body {
+      padding: 14px;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .field {
+      min-width: 0;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    label,
+    .label {
+      display: block;
+      margin: 0 0 5px;
+      color: var(--ink-soft);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      line-height: 1.25;
+      text-transform: uppercase;
+    }
+
+    input,
+    select {
+      width: 100%;
+      height: 36px;
+      border: 1px solid var(--rule-strong);
+      border-radius: 6px;
+      background: #ffffff;
+      color: var(--ink-strong);
+      padding: 7px 9px;
+      outline: none;
+      transition: border-color .16s ease, box-shadow .16s ease;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--bronze);
+      box-shadow: 0 0 0 3px rgba(175, 104, 40, .14);
+    }
+
+    input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--bronze);
+    }
+
+    .input-prefix {
+      position: relative;
+    }
+
+    .input-prefix span {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--ink-faint);
+      font-weight: 700;
+      pointer-events: none;
+    }
+
+    .input-prefix input {
+      padding-left: 23px;
+    }
+
+    .input-suffix {
+      position: relative;
+    }
+
+    .input-suffix span {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--ink-faint);
+      font-weight: 700;
+      pointer-events: none;
+    }
+
+    .input-suffix input {
+      padding-right: 28px;
+    }
+
+    .plans-panel {
+      margin-top: 14px;
+    }
+
+    .plan-stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .plan-card {
+      border: 1px solid var(--rule);
+      border-left: 4px solid var(--gray-plan-soft);
+      border-radius: var(--radius);
+      background: #ffffff;
+      padding: 11px;
+      transition: border-color .16s ease, box-shadow .16s ease;
+    }
+
+    .plan-card.client {
+      border-left-color: var(--bronze);
+    }
+
+    .plan-card.selected {
+      border-color: rgba(165, 180, 56, .9);
+      box-shadow: 0 0 0 3px rgba(165, 180, 56, .18);
+    }
+
+    .plan-card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .plan-name {
+      display: flex;
+      min-width: 0;
+      align-items: center;
+      gap: 8px;
+      color: var(--ink-strong);
+      font-weight: 700;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: var(--gray-plan);
+      box-shadow: 0 0 0 3px rgba(122, 118, 123, .14);
+      flex: 0 0 auto;
+    }
+
+    .client .dot {
+      background: var(--bronze);
+      box-shadow: 0 0 0 3px rgba(175, 104, 40, .16);
+    }
+
+    .plan-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .client-toggle {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-top: 10px;
+      color: var(--ink-soft);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .main-column {
+      display: grid;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      min-height: 112px;
+      border: 1px solid var(--rule);
+      border-radius: var(--radius);
+      background: #ffffff;
+      padding: 12px 12px 10px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .metric-label {
+      margin-bottom: 7px;
+      color: var(--ink-soft);
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      line-height: 1.25;
+      text-transform: uppercase;
+    }
+
+    .metric-value {
+      color: var(--ink-strong);
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 1.06;
+      overflow-wrap: anywhere;
+    }
+
+    .metric-note {
+      margin-top: 7px;
+      color: var(--ink-faint);
+      font-size: 12px;
+    }
+
+    .metric.highlight {
+      border-color: rgba(165, 180, 56, .65);
+      background: linear-gradient(180deg, rgba(165, 180, 56, .1), #ffffff 56%);
+    }
+
+    .chart-panel {
+      padding: 14px;
+      min-width: 0;
+    }
+
+    .chart-toolbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto minmax(160px, 210px) auto;
+      gap: 12px;
+      align-items: end;
+      margin-bottom: 12px;
+    }
+
+    .chart-title h2 {
+      margin: 0 0 3px;
+      color: var(--ink-strong);
+      font-size: 20px;
+      line-height: 1.15;
+    }
+
+    .chart-title p {
+      margin: 0;
+      color: var(--ink-soft);
+      font-size: 13px;
+    }
+
+    .segmented {
+      display: inline-grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      border: 1px solid var(--rule-strong);
+      border-radius: 7px;
+      overflow: clip;
+      background: #ffffff;
+    }
+
+    .segment {
+      border: 0;
+      border-right: 1px solid var(--rule-strong);
+      border-radius: 0;
+      background: transparent;
+      color: var(--ink-soft);
+      padding: 8px 10px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .segment:last-child {
+      border-right: 0;
+    }
+
+    .segment.active {
+      background: rgba(175, 104, 40, .1);
+      color: var(--bronze-dark);
+    }
+
+    .scale-control {
+      min-width: 0;
+    }
+
+    .range-row {
+      display: grid;
+      grid-template-columns: minmax(94px, 1fr) 54px;
+      gap: 8px;
+      align-items: center;
+      min-height: 36px;
+      border: 1px solid var(--rule-strong);
+      border-radius: 7px;
+      background: #ffffff;
+      padding: 0 9px;
+    }
+
+    input[type="range"] {
+      height: 28px;
+      padding: 0;
+      border: 0;
+      accent-color: var(--bronze);
+      background: transparent;
+    }
+
+    output {
+      color: var(--ink-soft);
+      font-size: 12px;
+      font-weight: 700;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .scale-control.is-disabled {
+      opacity: .48;
+    }
+
+    .chart-wrap {
+      position: relative;
+      width: 100%;
+      min-height: 460px;
+      border: 1px solid var(--rule);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, #ffffff, #fbfaf8);
+      overflow: hidden;
+    }
+
+    #projectionChart {
+      display: block;
+      width: 100%;
+      height: auto;
+      min-height: 460px;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      padding: 12px 2px 0;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--ink-soft);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .legend-line {
+      width: 24px;
+      height: 3px;
+      border-radius: 999px;
+      background: currentColor;
+    }
+
+    .legend-line.dashed {
+      height: 0;
+      border-top: 3px dashed currentColor;
+      background: transparent;
+    }
+
+    .table-panel {
+      border: 1px solid var(--rule);
+      border-radius: var(--radius);
+      background: #ffffff;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      min-width: 760px;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    thead {
+      background: rgba(80, 77, 81, .04);
+    }
+
+    th,
+    td {
+      padding: 9px 10px;
+      border-bottom: 1px solid var(--rule);
+      text-align: right;
+      vertical-align: middle;
+    }
+
+    th:first-child,
+    td:first-child,
+    th:nth-child(2),
+    td:nth-child(2) {
+      text-align: left;
+    }
+
+    th {
+      color: var(--ink-soft);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    tbody tr:hover td {
+      background: rgba(80, 77, 81, .035);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 22px;
+      border-radius: 999px;
+      padding: 3px 8px;
+      background: rgba(122, 118, 123, .12);
+      color: var(--gray-plan-dark);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .badge.client {
+      background: rgba(175, 104, 40, .12);
+      color: var(--bronze-dark);
+    }
+
+    .fine-print {
+      color: var(--ink-faint);
+      font-size: 12px;
+    }
+
+    .mobile-note {
+      display: none;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .tooltip {
+      position: relative;
+    }
+
+    .tooltip::after {
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% + 7px);
+      z-index: 20;
+      min-width: max-content;
+      max-width: 220px;
+      transform: translateX(-50%);
+      border-radius: 4px;
+      background: var(--ink-strong);
+      color: #ffffff;
+      content: attr(aria-label);
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.3;
+      opacity: 0;
+      padding: 6px 8px;
+      pointer-events: none;
+      transition: opacity .15s ease;
+      white-space: normal;
+    }
+
+    .tooltip:hover::after,
+    .tooltip:focus-visible::after {
+      opacity: 1;
+    }
+
+    body.modal-open {
+      overflow: hidden;
+    }
+
+    .animation-modal[hidden] {
+      display: none;
+    }
+
+    .animation-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: grid;
+      place-items: center;
+      background: rgba(34, 31, 35, .58);
+      padding: 22px;
+    }
+
+    .animation-dialog {
+      width: min(1120px, 100%);
+      max-height: calc(100vh - 44px);
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      border: 1px solid rgba(255, 255, 255, .46);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: 0 18px 64px rgba(34, 31, 35, .28);
+      overflow: hidden;
+    }
+
+    .animation-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--rule);
+      background: rgba(80, 77, 81, .025);
+    }
+
+    .animation-head h2 {
+      margin: 0;
+      color: var(--ink-strong);
+      font-size: 16px;
+      line-height: 1.2;
+    }
+
+    .animation-stage {
+      min-height: 0;
+      background: #ffffff;
+      padding: 12px;
+    }
+
+    #animationChart {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: min(66vh, 640px);
+      border: 1px solid var(--rule);
+      border-radius: 7px;
+      background: linear-gradient(180deg, #ffffff, #fbfaf8);
+    }
+
+    .animation-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 14px;
+      border-top: 1px solid var(--rule);
+      background: var(--surface-soft);
+    }
+
+    .animation-status {
+      color: var(--ink-soft);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    @media (max-width: 1120px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .controls-column {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 14px;
+      }
+
+      .plans-panel {
+        margin-top: 0;
+      }
+    }
+
+    @media (max-width: 820px) {
+      .app-shell {
+        width: min(100% - 20px, 720px);
+        padding-top: 12px;
+      }
+
+      .masthead {
+        grid-template-columns: 1fr;
+        align-items: start;
+        gap: 14px;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+
+      .masthead-actions {
+        justify-content: start;
+      }
+
+      .controls-column,
+      .summary-grid,
+      .chart-toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      .field-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .segmented {
+        width: 100%;
+      }
+
+      .segment {
+        padding-inline: 6px;
+      }
+
+      .plan-card-head {
+        display: grid;
+        grid-template-columns: 1fr;
+        align-items: start;
+      }
+
+      .plan-actions {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        padding-left: 16px;
+      }
+
+      .animation-modal {
+        padding: 10px;
+      }
+
+      .animation-head,
+      .animation-actions {
+        align-items: stretch;
+      }
+
+      .animation-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .mobile-note {
+        display: block;
+        margin-top: 8px;
+      }
+    }
+
+    @media print {
+      body {
+        background: #ffffff;
+      }
+
+      .app-shell {
+        width: auto;
+        padding: 0;
+      }
+
+      .masthead-actions,
+      .controls-column,
+      .chart-toolbar select,
+      .chart-toolbar .label,
+      .scale-control,
+      .segmented,
+      .animation-modal,
+      .btn,
+      .mobile-note {
+        display: none !important;
+      }
+
+      .workspace {
+        display: block;
+      }
+
+      .summary-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+
+      .panel,
+      .chart-panel,
+      .metric,
+      .table-panel {
+        box-shadow: none;
+      }
+
+      .chart-panel,
+      .table-panel,
+      .summary-grid {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      .chart-wrap {
+        min-height: 380px;
+      }
+
+      #projectionChart {
+        min-height: 380px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="masthead">
+      <div>
+        <p class="eyebrow">Innovest Portfolio Solutions</p>
+        <h1>401(k) Fee Projector</h1>
+        <p class="lede">Compare participant outcomes across recordkeeper fee structures using one shared return and savings scenario.</p>
+      </div>
+      <div class="masthead-actions">
+        <button class="btn" type="button" id="resetButton" aria-label="Reset scenario">
+          <span class="icon" aria-hidden="true">↺</span>
+          Reset
+        </button>
+        <button class="btn primary" type="button" id="exportButton" aria-label="Export PDF">
+          <span class="icon" aria-hidden="true">↓</span>
+          Export PDF
+        </button>
+        <button class="btn" type="button" id="animatedExportButton" aria-label="Preview animated export">
+          Animated Export
+        </button>
+      </div>
+    </header>
+
+    <section class="workspace" aria-label="401(k) fee projection workspace">
+      <aside class="controls-column">
+        <section class="panel" aria-labelledby="scenarioTitle">
+          <div class="panel-header">
+            <h2 class="panel-title" id="scenarioTitle">Scenario</h2>
+          </div>
+          <div class="panel-body">
+            <div class="field-grid">
+              <div class="field">
+                <label for="startingBalance">Starting balance</label>
+                <div class="input-prefix">
+                  <span>$</span>
+                  <input id="startingBalance" data-scenario="startingBalance" inputmode="decimal" type="number" min="0" step="1000">
+                </div>
+              </div>
+              <div class="field">
+                <label for="annualContribution">Annual contribution</label>
+                <div class="input-prefix">
+                  <span>$</span>
+                  <input id="annualContribution" data-scenario="annualContribution" inputmode="decimal" type="number" min="0" step="500">
+                </div>
+              </div>
+              <div class="field">
+                <label for="annualReturn">Gross return</label>
+                <div class="input-suffix">
+                  <input id="annualReturn" data-scenario="annualReturnPercent" inputmode="decimal" type="number" min="-99" max="99" step="0.25">
+                  <span>%</span>
+                </div>
+              </div>
+              <div class="field">
+                <label for="years">Years</label>
+                <input id="years" data-scenario="years" inputmode="numeric" type="number" min="1" max="60" step="1">
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel plans-panel" aria-labelledby="plansTitle">
+          <div class="panel-header">
+            <h2 class="panel-title" id="plansTitle">Plans</h2>
+            <button class="btn icon-only tooltip" type="button" id="addPlanButton" aria-label="Add plan">
+              <span class="icon" aria-hidden="true">+</span>
+            </button>
+          </div>
+          <div class="panel-body">
+            <div class="plan-stack" id="planList"></div>
+          </div>
+        </section>
+      </aside>
+
+      <section class="main-column">
+        <section class="summary-grid" id="summaryGrid" aria-label="Projection summary"></section>
+
+        <section class="chart-panel" aria-labelledby="chartHeading">
+          <div class="chart-toolbar">
+            <div class="chart-title">
+              <h2 id="chartHeading">Projected Account Balance</h2>
+              <p id="chartSubtitle">Same gross return, different fee drag.</p>
+            </div>
+            <div>
+              <span class="label" id="viewLabel">Chart view</span>
+              <div class="segmented" role="tablist" aria-labelledby="viewLabel">
+                <button class="segment active" type="button" data-view="balance" role="tab" aria-selected="true">Balance</button>
+                <button class="segment" type="button" data-view="fees" role="tab" aria-selected="false">Fees</button>
+                <button class="segment" type="button" data-view="gap" role="tab" aria-selected="false">Gap</button>
+              </div>
+            </div>
+            <div class="scale-control" id="balanceScaleControl">
+              <label for="balanceFocus">Y-axis focus</label>
+              <div class="range-row">
+                <input id="balanceFocus" type="range" min="0" max="100" step="5" value="55">
+                <output id="balanceFocusValue" for="balanceFocus">55%</output>
+              </div>
+            </div>
+            <div>
+              <label for="selectedPlan">Selected plan</label>
+              <select id="selectedPlan"></select>
+            </div>
+          </div>
+
+          <div class="chart-wrap">
+            <svg id="projectionChart" role="img" aria-labelledby="chartHeading chartSubtitle"></svg>
+          </div>
+          <div class="legend" id="legend"></div>
+          <p class="fine-print mobile-note">On smaller screens, swipe the summary table horizontally to review each plan.</p>
+        </section>
+
+        <section class="table-panel" aria-labelledby="tableTitle">
+          <div class="panel-header">
+            <h2 class="panel-title" id="tableTitle">Ending Outcome</h2>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Plan</th>
+                  <th>Status</th>
+                  <th>Asset fee</th>
+                  <th>Flat fee</th>
+                  <th>Ending balance</th>
+                  <th>Cumulative fees</th>
+                  <th>Gap vs. no-fee</th>
+                </tr>
+              </thead>
+              <tbody id="resultRows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <p class="fine-print">For illustrative purposes only. Not investment advice.</p>
+      </section>
+    </section>
+  </main>
+
+  <div class="animation-modal" id="animationModal" role="dialog" aria-modal="true" aria-labelledby="animationTitle" hidden>
+    <div class="animation-dialog">
+      <div class="animation-head">
+        <h2 id="animationTitle">Animated Chart Export</h2>
+        <button class="btn icon-only tooltip" type="button" id="closeAnimationButton" aria-label="Close animation preview">
+          <span class="icon" aria-hidden="true">X</span>
+        </button>
+      </div>
+      <div class="animation-stage">
+        <svg id="animationChart" role="img" aria-labelledby="animationTitle chartSubtitle"></svg>
+      </div>
+      <div class="animation-actions">
+        <button class="btn" type="button" id="replayAnimationButton">Replay</button>
+        <button class="btn primary" type="button" id="downloadAnimationButton">Download WebM</button>
+        <span class="animation-status" id="animationStatus" aria-live="polite"></span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const NON_INNOVEST_SERIES = ["#7A767B", "#9A969B", "#B8B3B7", "#6E6C70", "#C8C3C6"];
+    const INNOVEST_SERIES = ["#AF6828", "#C98942", "#D98A3D", "#8D5218", "#D7B393"];
+    const BASELINE_COLOR = "#504D51";
+    const LIME_COLOR = "#A5B438";
+    const ANIMATION_REVEAL_MS = 8000;
+    const ANIMATION_HOLD_MS = 1500;
+    const ANIMATION_FPS = 30;
+    const ANIMATION_WIDTH = 1290;
+    const ANIMATION_HEIGHT = 460;
+
+    const defaultScenario = {
+      startingBalance: 100000,
+      annualContribution: 12000,
+      annualReturnPercent: 6,
+      years: 40,
+      plans: [
+        {
+          id: "innovest-client",
+          name: "Innovest Client Plan",
+          recordkeeper: "Current RK",
+          isInnovestClient: true,
+          assetFeeBps: 28,
+          annualFlatFee: 36
+        },
+        {
+          id: "prospect-market",
+          name: "Prospect Plan",
+          recordkeeper: "Market RK",
+          isInnovestClient: false,
+          assetFeeBps: 55,
+          annualFlatFee: 72
+        },
+        {
+          id: "high-fee-plan",
+          name: "High-Fee Benchmark",
+          recordkeeper: "Legacy RK",
+          isInnovestClient: false,
+          assetFeeBps: 95,
+          annualFlatFee: 120
+        }
+      ]
+    };
+
+    let scenario = structuredClone(defaultScenario);
+    let chartView = "balance";
+    let balanceYAxisFocus = 55;
+    let selectedPlanId = scenario.plans[0].id;
+    let animationFrameId = 0;
+    let animationStartTime = 0;
+    let animationProjected = null;
+
+    const els = {
+      planList: document.getElementById("planList"),
+      summaryGrid: document.getElementById("summaryGrid"),
+      chart: document.getElementById("projectionChart"),
+      legend: document.getElementById("legend"),
+      resultRows: document.getElementById("resultRows"),
+      selectedPlan: document.getElementById("selectedPlan"),
+      balanceFocus: document.getElementById("balanceFocus"),
+      balanceFocusValue: document.getElementById("balanceFocusValue"),
+      balanceScaleControl: document.getElementById("balanceScaleControl"),
+      chartHeading: document.getElementById("chartHeading"),
+      chartSubtitle: document.getElementById("chartSubtitle"),
+      animatedExportButton: document.getElementById("animatedExportButton"),
+      animationModal: document.getElementById("animationModal"),
+      animationChart: document.getElementById("animationChart"),
+      replayAnimationButton: document.getElementById("replayAnimationButton"),
+      downloadAnimationButton: document.getElementById("downloadAnimationButton"),
+      closeAnimationButton: document.getElementById("closeAnimationButton"),
+      animationStatus: document.getElementById("animationStatus")
+    };
+
+    const moneyFormatter = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0
+    });
+
+    const compactMoneyFormatter = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      notation: "compact",
+      maximumFractionDigits: 1
+    });
+
+    function uid() {
+      return `plan-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+    }
+
+    function clampNumber(value, min, max, fallback) {
+      const parsed = Number(value);
+      if (!Number.isFinite(parsed)) return fallback;
+      return Math.min(max, Math.max(min, parsed));
+    }
+
+    function formatMoney(value, compact = false) {
+      const cleaned = Math.abs(value) < .5 ? 0 : value;
+      return (compact ? compactMoneyFormatter : moneyFormatter).format(cleaned);
+    }
+
+    function formatBps(value) {
+      return `${Number(value || 0).toLocaleString("en-US", { maximumFractionDigits: 1 })} bps`;
+    }
+
+    function projectPlan(plan, settings) {
+      const years = Math.round(clampNumber(settings.years, 1, 60, 40));
+      let balance = Math.max(0, Number(settings.startingBalance) || 0);
+      let cumulativeFees = 0;
+      const rows = [{ year: 0, balance, cumulativeFees, gap: 0 }];
+      const monthlyReturn = Math.pow(1 + ((Number(settings.annualReturnPercent) || 0) / 100), 1 / 12) - 1;
+      const monthlyContribution = Math.max(0, Number(settings.annualContribution) || 0) / 12;
+      const monthlyAssetFee = Math.max(0, Number(plan.assetFeeBps) || 0) / 10000 / 12;
+      const monthlyFlatFee = Math.max(0, Number(plan.annualFlatFee) || 0) / 12;
+
+      for (let month = 1; month <= years * 12; month += 1) {
+        balance = Math.max(0, balance * (1 + monthlyReturn));
+        balance += monthlyContribution;
+        const assetFee = balance * monthlyAssetFee;
+        const totalFee = Math.min(balance, assetFee + monthlyFlatFee);
+        balance = Math.max(0, balance - totalFee);
+        cumulativeFees += totalFee;
+
+        if (month % 12 === 0) {
+          rows.push({
+            year: month / 12,
+            balance,
+            cumulativeFees,
+            gap: 0
+          });
+        }
+      }
+
+      return rows;
+    }
+
+    function calculateScenario() {
+      const baselinePlan = {
+        id: "baseline",
+        name: "No-fee baseline",
+        recordkeeper: "No fees",
+        isBaseline: true,
+        isInnovestClient: false,
+        assetFeeBps: 0,
+        annualFlatFee: 0
+      };
+      const allPlans = [baselinePlan, ...scenario.plans];
+      const projected = allPlans.map((plan) => ({
+        plan,
+        color: getPlanColor(plan, allPlans),
+        data: projectPlan(plan, scenario)
+      }));
+      const baseline = projected[0];
+
+      projected.forEach((series) => {
+        series.data = series.data.map((row, index) => ({
+          ...row,
+          gap: baseline.data[index].balance - row.balance
+        }));
+      });
+
+      return projected;
+    }
+
+    function getPlanColor(plan, allPlans) {
+      if (plan.isBaseline) return BASELINE_COLOR;
+      const peerPlans = allPlans.filter((item) => !item.isBaseline && item.isInnovestClient === plan.isInnovestClient);
+      const index = Math.max(0, peerPlans.findIndex((item) => item.id === plan.id));
+      return plan.isInnovestClient
+        ? INNOVEST_SERIES[index % INNOVEST_SERIES.length]
+        : NON_INNOVEST_SERIES[index % NON_INNOVEST_SERIES.length];
+    }
+
+    function ending(series) {
+      return series.data[series.data.length - 1];
+    }
+
+    function renderScenarioInputs() {
+      document.querySelectorAll("[data-scenario]").forEach((input) => {
+        input.value = scenario[input.dataset.scenario];
+      });
+    }
+
+    function renderPlans() {
+      els.planList.innerHTML = scenario.plans.map((plan) => `
+        <article class="plan-card ${plan.isInnovestClient ? "client" : ""} ${plan.id === selectedPlanId ? "selected" : ""}" data-plan-card="${plan.id}">
+          <div class="plan-card-head">
+            <div class="plan-name">
+              <span class="dot" aria-hidden="true"></span>
+              <span data-plan-title="${plan.id}">${escapeHtml(plan.name || "Untitled plan")}</span>
+            </div>
+            <div class="plan-actions">
+              <button class="btn icon-only tooltip" type="button" data-action="select-plan" data-id="${plan.id}" aria-label="Select plan">
+                <span class="icon" aria-hidden="true">✓</span>
+              </button>
+              <button class="btn icon-only tooltip" type="button" data-action="duplicate-plan" data-id="${plan.id}" aria-label="Duplicate plan">
+                <span class="icon" aria-hidden="true">⧉</span>
+              </button>
+              <button class="btn icon-only danger tooltip" type="button" data-action="delete-plan" data-id="${plan.id}" aria-label="Delete plan">
+                <span class="icon" aria-hidden="true">×</span>
+              </button>
+            </div>
+          </div>
+          <div class="field-grid">
+            <div class="field full">
+              <label for="name-${plan.id}">Plan/provider name</label>
+              <input id="name-${plan.id}" data-plan-field="name" data-id="${plan.id}" value="${escapeAttribute(plan.name)}">
+            </div>
+            <div class="field full">
+              <label for="rk-${plan.id}">Recordkeeper</label>
+              <input id="rk-${plan.id}" data-plan-field="recordkeeper" data-id="${plan.id}" value="${escapeAttribute(plan.recordkeeper)}">
+            </div>
+            <div class="field">
+              <label for="bps-${plan.id}">Asset fee</label>
+              <div class="input-suffix">
+                <input id="bps-${plan.id}" data-plan-field="assetFeeBps" data-id="${plan.id}" type="number" min="0" max="500" step="1" value="${Number(plan.assetFeeBps) || 0}">
+                <span>bps</span>
+              </div>
+            </div>
+            <div class="field">
+              <label for="flat-${plan.id}">Flat fee</label>
+              <div class="input-prefix">
+                <span>$</span>
+                <input id="flat-${plan.id}" data-plan-field="annualFlatFee" data-id="${plan.id}" type="number" min="0" step="1" value="${Number(plan.annualFlatFee) || 0}">
+              </div>
+            </div>
+          </div>
+          <label class="client-toggle" for="client-${plan.id}">
+            <input id="client-${plan.id}" data-plan-field="isInnovestClient" data-id="${plan.id}" type="checkbox" ${plan.isInnovestClient ? "checked" : ""}>
+            Already Innovest client
+          </label>
+        </article>
+      `).join("");
+    }
+
+    function renderSelectedPlanOptions() {
+      if (!scenario.plans.some((plan) => plan.id === selectedPlanId)) {
+        selectedPlanId = scenario.plans[0]?.id || "";
+      }
+      els.selectedPlan.innerHTML = scenario.plans.map((plan) => `
+        <option value="${plan.id}" ${plan.id === selectedPlanId ? "selected" : ""}>${escapeHtml(plan.name || "Untitled plan")}</option>
+      `).join("");
+    }
+
+    function renderScaleControl() {
+      const isBalance = chartView === "balance";
+      els.balanceFocus.value = String(balanceYAxisFocus);
+      els.balanceFocus.disabled = !isBalance;
+      els.balanceScaleControl.classList.toggle("is-disabled", !isBalance);
+      els.balanceFocusValue.value = balanceYAxisFocus === 0 ? "Full" : `${balanceYAxisFocus}%`;
+      els.balanceFocusValue.textContent = balanceYAxisFocus === 0 ? "Full" : `${balanceYAxisFocus}%`;
+    }
+
+    function renderSummary(projected) {
+      const participantSeries = projected.filter((series) => !series.plan.isBaseline);
+      const selectedSeries = participantSeries.find((series) => series.plan.id === selectedPlanId) || participantSeries[0];
+      const best = participantSeries.reduce((winner, series) => ending(series).balance > ending(winner).balance ? series : winner, participantSeries[0]);
+      const lowestDrag = participantSeries.reduce((winner, series) => ending(series).gap < ending(winner).gap ? series : winner, participantSeries[0]);
+      const largestGap = participantSeries.reduce((winner, series) => ending(series).gap > ending(winner).gap ? series : winner, participantSeries[0]);
+      const selectedEnd = selectedSeries ? ending(selectedSeries) : null;
+
+      const cards = [
+        {
+          label: "Best ending balance",
+          value: best ? formatMoney(ending(best).balance, true) : "$0",
+          note: best ? best.plan.name : "Add a plan",
+          highlight: best?.plan.id === selectedPlanId
+        },
+        {
+          label: "Lowest fee drag",
+          value: lowestDrag ? formatMoney(ending(lowestDrag).gap, true) : "$0",
+          note: lowestDrag ? lowestDrag.plan.name : "Add a plan",
+          highlight: lowestDrag?.plan.id === selectedPlanId
+        },
+        {
+          label: "Largest gap",
+          value: largestGap ? formatMoney(ending(largestGap).gap, true) : "$0",
+          note: largestGap ? `${largestGap.plan.name} vs. no-fee` : "Add a plan",
+          highlight: largestGap?.plan.id === selectedPlanId
+        },
+        {
+          label: "Selected plan fees",
+          value: selectedEnd ? formatMoney(selectedEnd.cumulativeFees, true) : "$0",
+          note: selectedSeries ? selectedSeries.plan.name : "No selected plan",
+          highlight: true
+        }
+      ];
+
+      els.summaryGrid.innerHTML = cards.map((card) => `
+        <article class="metric ${card.highlight ? "highlight" : ""}">
+          <div class="metric-label">${escapeHtml(card.label)}</div>
+          <div class="metric-value">${escapeHtml(card.value)}</div>
+          <div class="metric-note">${escapeHtml(card.note)}</div>
+        </article>
+      `).join("");
+    }
+
+    function renderResultsTable(projected) {
+      els.resultRows.innerHTML = projected.map((series) => {
+        const end = ending(series);
+        const plan = series.plan;
+        return `
+          <tr>
+            <td><strong>${escapeHtml(plan.name)}</strong><br><span class="fine-print">${escapeHtml(plan.recordkeeper)}</span></td>
+            <td>${plan.isBaseline ? '<span class="badge">Baseline</span>' : plan.isInnovestClient ? '<span class="badge client">Innovest client</span>' : '<span class="badge">Prospect</span>'}</td>
+            <td>${formatBps(plan.assetFeeBps)}</td>
+            <td>${formatMoney(plan.annualFlatFee || 0)}</td>
+            <td><strong>${formatMoney(end.balance)}</strong></td>
+            <td>${formatMoney(end.cumulativeFees)}</td>
+            <td>${formatMoney(end.gap)}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function renderLegend(projected) {
+      els.legend.innerHTML = projected.map((series) => `
+        <span class="legend-item" style="color: ${series.color}">
+          <span class="legend-line ${series.plan.isBaseline ? "dashed" : ""}"></span>
+          ${escapeHtml(series.plan.name)}
+        </span>
+      `).join("");
+    }
+
+    function renderChart(projected) {
+      renderChartToSvg(els.chart, projected);
+    }
+
+    function renderChartToSvg(svg, projected, options = {}) {
+      const frame = buildChartFrame(projected, options);
+      svg.setAttribute("viewBox", `0 0 ${frame.width} ${frame.height}`);
+      svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+      svg.innerHTML = frame.markup;
+    }
+
+    function getChartSvgMarkup(projected, options = {}) {
+      const frame = buildChartFrame(projected, options);
+      return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${frame.width} ${frame.height}" width="${frame.width}" height="${frame.height}" preserveAspectRatio="xMidYMid meet">${frame.markup}</svg>`;
+    }
+
+    function buildChartFrame(projected, options = {}) {
+      const width = options.width || 1290;
+      const height = options.height || 460;
+      const isWideExport = height > 560;
+      const isRaceFrame = Boolean(options.yearLabel);
+      const margin = options.margin || {
+        top: isRaceFrame ? 78 : isWideExport ? 64 : 34,
+        right: isWideExport ? 230 : 210,
+        bottom: isWideExport ? 72 : 54,
+        left: isWideExport ? 88 : 80
+      };
+      const plotWidth = width - margin.left - margin.right;
+      const plotHeight = height - margin.top - margin.bottom;
+      const plotEndX = margin.left + plotWidth;
+      const labelLaneX = plotEndX + 24;
+      const labelLineEndX = labelLaneX - 12;
+      const years = Math.max(1, Math.round(Number(scenario.years) || 40));
+      const targetYear = Number.isFinite(options.targetYear) ? clampNumber(options.targetYear, 0, years, years) : years;
+      const requestedXDomain = Number.isFinite(options.xDomainYears) ? options.xDomainYears : years;
+      const xDomainYears = Math.max(1, Math.min(years, Math.max(targetYear, requestedXDomain)));
+      const frameProjected = Number.isFinite(options.targetYear) ? projectToYear(projected, targetYear) : projected;
+      const finalValues = projected.flatMap((series) => series.data.map((row) => getChartValue(row)));
+      const domain = options.domain || getChartDomain(projected, finalValues);
+      const yTicks = makeTicks(domain.min, domain.max, 5);
+      const xTicks = makeYearTicks(Math.max(1, Math.ceil(xDomainYears))).filter((tick) => tick <= xDomainYears + .01);
+      const selectedId = selectedPlanId;
+
+      const x = (year) => margin.left + (year / xDomainYears) * plotWidth;
+      const y = (value) => {
+        const clamped = Math.min(domain.max, Math.max(domain.min, value));
+        return margin.top + plotHeight - ((clamped - domain.min) / (domain.max - domain.min)) * plotHeight;
+      };
+
+      const grid = yTicks.map((tick) => `
+        <line x1="${margin.left}" y1="${y(tick)}" x2="${plotEndX}" y2="${y(tick)}" stroke="#e8e5e1" stroke-width="1"></line>
+        <text x="${margin.left - 12}" y="${y(tick) + 4}" text-anchor="end" fill="#6e6c70" font-size="12">${formatAxisValue(tick)}</text>
+      `).join("");
+
+      const xAxis = xTicks.map((tick) => `
+        <line x1="${x(tick)}" y1="${height - margin.bottom}" x2="${x(tick)}" y2="${height - margin.bottom + 5}" stroke="#bcb8bb"></line>
+        <text x="${x(tick)}" y="${height - margin.bottom + 24}" text-anchor="middle" fill="#6e6c70" font-size="12">${tick}</text>
+      `).join("");
+
+      const paths = frameProjected.map((series) => {
+        const path = series.data.map((row, index) => `${index === 0 ? "M" : "L"} ${x(row.year).toFixed(2)} ${y(getChartValue(row)).toFixed(2)}`).join(" ");
+        const isSelected = series.plan.id === selectedId;
+        const stroke = series.color;
+        const strokeWidth = series.plan.isBaseline ? 2.2 : isSelected ? 4.2 : 3;
+        const opacity = series.plan.isBaseline ? .9 : series.plan.isInnovestClient ? 1 : .76;
+        const dash = series.plan.isBaseline ? 'stroke-dasharray="8 7"' : "";
+        const halo = isSelected && !series.plan.isBaseline
+          ? `<path d="${path}" fill="none" stroke="${LIME_COLOR}" stroke-width="8" opacity=".22" stroke-linecap="round" stroke-linejoin="round"></path>`
+          : "";
+        return `${halo}<path d="${path}" fill="none" stroke="${stroke}" stroke-width="${strokeWidth}" opacity="${opacity}" ${dash} stroke-linecap="round" stroke-linejoin="round"></path>`;
+      }).join("");
+
+      const endLabels = layoutEndLabels(
+        frameProjected,
+        (series) => y(getChartValue(ending(series))),
+        margin.top + 18,
+        height - margin.bottom - 12
+      );
+
+      const labels = endLabels.map(({ series, anchorY, labelY }) => {
+        const end = ending(series);
+        const value = getChartValue(end);
+        const isSelected = series.plan.id === selectedId;
+        const fill = series.color;
+        const label = series.plan.isBaseline ? "No-fee" : series.plan.name;
+        const labelWeight = series.plan.isBaseline || isSelected ? 700 : 600;
+        return `
+          <line x1="${x(end.year) + 6}" y1="${anchorY}" x2="${labelLineEndX}" y2="${labelY}" stroke="${fill}" stroke-width="1.3" opacity=".55"></line>
+          ${isSelected && !series.plan.isBaseline ? `<circle cx="${x(end.year)}" cy="${anchorY}" r="8" fill="${LIME_COLOR}" opacity=".22"></circle>` : ""}
+          <circle cx="${x(end.year)}" cy="${anchorY}" r="${isSelected ? 5 : 3.7}" fill="${fill}"></circle>
+          <text x="${labelLaneX}" y="${labelY - 3}" text-anchor="start" fill="${fill}" stroke="#ffffff" stroke-width="4" paint-order="stroke" font-size="12.5" font-weight="${labelWeight}">${escapeSvg(label)}</text>
+          <text x="${labelLaneX}" y="${labelY + 11}" text-anchor="start" fill="#6e6c70" stroke="#ffffff" stroke-width="4" paint-order="stroke" font-size="11.5">${escapeSvg(formatMoney(value, true))}</text>
+        `;
+      }).join("");
+
+      const raceSummary = options.yearLabel ? buildRaceSummary(frameProjected, margin.left, 18) : "";
+      const yearBadge = options.yearLabel ? `
+        <g>
+          <rect x="${plotEndX - 178}" y="${isWideExport ? 18 : 12}" width="178" height="34" rx="6" fill="#ffffff" stroke="#e3e1e2"></rect>
+          <text x="${plotEndX - 89}" y="${isWideExport ? 40 : 34}" text-anchor="middle" fill="#221f23" font-size="14" font-weight="700">${escapeSvg(options.yearLabel)}</text>
+        </g>
+      ` : "";
+      const yAxisTitle = options.yearLabel ? "" : `<text x="${margin.left}" y="18" fill="#504D51" font-size="13" font-weight="700">${escapeSvg(getYAxisLabel())}</text>`;
+
+      return {
+        width,
+        height,
+        markup: `
+        <rect width="${width}" height="${height}" fill="transparent"></rect>
+        <g font-family="Calibri, Carlito, 'Segoe UI', Arial, sans-serif">
+          ${grid}
+          <line x1="${margin.left}" y1="${height - margin.bottom}" x2="${plotEndX}" y2="${height - margin.bottom}" stroke="#cfcace" stroke-width="1.2"></line>
+          <line x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${height - margin.bottom}" stroke="#cfcace" stroke-width="1.2"></line>
+          ${xAxis}
+          ${paths}
+          ${labels}
+          ${yAxisTitle}
+          <text x="${(margin.left + plotEndX) / 2}" y="${height - 10}" text-anchor="middle" fill="#6e6c70" font-size="12">Projection year</text>
+          ${raceSummary}
+          ${yearBadge}
+        </g>
+      `
+      };
+    }
+
+    function buildRaceSummary(projected, x, y) {
+      const ranked = projected
+        .filter((series) => !series.plan.isBaseline)
+        .map((series) => ({
+          series,
+          value: getChartValue(ending(series))
+        }))
+        .sort((a, b) => b.value - a.value);
+
+      if (!ranked.length) return "";
+
+      const leader = ranked[0];
+      const runnerUp = ranked[1];
+      const leaderName = truncateLabel(leader.series.plan.name, 26);
+      const leaderValue = formatMoney(leader.value, true);
+      const leadText = runnerUp
+        ? getRaceLeadText(leader.value - runnerUp.value)
+        : leaderValue;
+
+      return `
+        <g>
+          <rect x="${x}" y="${y}" width="290" height="46" rx="6" fill="#ffffff" stroke="#e3e1e2"></rect>
+          <text x="${x + 12}" y="${y + 17}" fill="#6e6c70" font-size="10.5" font-weight="700" letter-spacing=".08em">${escapeSvg(getRaceSummaryTitle())}</text>
+          <text x="${x + 12}" y="${y + 34}" fill="${leader.series.color}" font-size="14" font-weight="700">${escapeSvg(leaderName)}</text>
+          <text x="${x + 278}" y="${y + 34}" text-anchor="end" fill="#504D51" font-size="12.5" font-weight="700">${escapeSvg(leadText)}</text>
+        </g>
+      `;
+    }
+
+    function getRaceSummaryTitle() {
+      if (chartView === "fees") return "MOST FEES SO FAR";
+      if (chartView === "gap") return "LARGEST GAP SO FAR";
+      return "LEADING PLAN SO FAR";
+    }
+
+    function getRaceLeadText(lead) {
+      if (chartView === "fees" || chartView === "gap") return formatMoney(Math.abs(lead), true);
+      return `+${formatMoney(Math.abs(lead), true)}`;
+    }
+
+    function truncateLabel(value, maxLength) {
+      const label = String(value || "Untitled plan");
+      if (label.length <= maxLength) return label;
+      return `${label.slice(0, Math.max(0, maxLength - 3))}...`;
+    }
+
+    function projectToYear(projected, targetYear) {
+      return projected.map((series) => ({
+        ...series,
+        data: interpolateRows(series.data, targetYear)
+      }));
+    }
+
+    function interpolateRows(rows, targetYear) {
+      if (!rows.length) return [];
+      if (targetYear <= rows[0].year) return [rows[0]];
+      const last = rows[rows.length - 1];
+      if (targetYear >= last.year) return rows;
+
+      const lowerIndex = Math.max(0, Math.floor(targetYear));
+      const lower = rows[lowerIndex] || rows[0];
+      const upper = rows[lowerIndex + 1] || last;
+      const partial = targetYear - lower.year;
+      const visibleRows = rows.filter((row) => row.year <= lower.year);
+
+      if (partial <= .001) return visibleRows;
+
+      visibleRows.push({
+        year: targetYear,
+        balance: lerp(lower.balance, upper.balance, partial),
+        cumulativeFees: lerp(lower.cumulativeFees, upper.cumulativeFees, partial),
+        gap: lerp(lower.gap, upper.gap, partial)
+      });
+      return visibleRows;
+    }
+
+    function getAnimationFrameOptions(projected, rawProgress) {
+      const progress = clampNumber(rawProgress, 0, 1, 0);
+      const eased = easeInOutCubic(progress);
+      const years = Math.max(1, Math.round(Number(scenario.years) || 40));
+      const targetYear = years * eased;
+      const minimumWindow = Math.min(years, Math.max(4, years * .18));
+      const leadYears = Math.max(1, years * .08);
+      const xDomainYears = Math.min(years, Math.max(targetYear + leadYears, lerp(minimumWindow, years, Math.pow(progress, 1.35))));
+      const frameProjected = projectToYear(projected, targetYear);
+      const visibleValues = frameProjected.flatMap((series) => series.data.map((row) => getChartValue(row)));
+      const finalValues = projected.flatMap((series) => series.data.map((row) => getChartValue(row)));
+      const finalDomain = getChartDomain(projected, finalValues);
+      const visibleDomain = {
+        min: 0,
+        max: niceMax(Math.max(...visibleValues, 1) * 1.12)
+      };
+      const zoomProgress = Math.pow(progress, 1.65);
+      const domain = {
+        min: lerp(visibleDomain.min, finalDomain.min, Math.pow(progress, 1.2)),
+        max: Math.max(1, lerp(visibleDomain.max, finalDomain.max, zoomProgress))
+      };
+
+      return {
+        width: ANIMATION_WIDTH,
+        height: ANIMATION_HEIGHT,
+        targetYear,
+        xDomainYears,
+        domain,
+        yearLabel: `Year ${Math.min(years, Math.max(0, Math.round(targetYear)))} of ${years}`
+      };
+    }
+
+    function easeInOutCubic(value) {
+      return value < .5
+        ? 4 * value * value * value
+        : 1 - Math.pow(-2 * value + 2, 3) / 2;
+    }
+
+    function getChartDomain(projected, values) {
+      const fullMin = 0;
+      const fullMax = niceMax(Math.max(...values, 1));
+
+      if (chartView !== "balance" || balanceYAxisFocus <= 0) {
+        return { min: fullMin, max: fullMax };
+      }
+
+      const endingValues = projected.map((series) => getChartValue(ending(series)));
+      const endingMin = Math.min(...endingValues);
+      const endingMax = Math.max(...endingValues);
+      const endingSpread = Math.max(endingMax - endingMin, endingMax * .025, 1);
+      const focusPadding = endingSpread * .65;
+      const focusedMin = Math.max(0, endingMin - focusPadding);
+      const focusedMax = endingMax + focusPadding;
+      const focus = balanceYAxisFocus / 100;
+      const min = lerp(fullMin, focusedMin, focus);
+      const max = lerp(fullMax, focusedMax, focus);
+
+      return {
+        min,
+        max: Math.max(max, min + 1)
+      };
+    }
+
+    function lerp(start, end, amount) {
+      return start + (end - start) * amount;
+    }
+
+    function layoutEndLabels(projected, yForSeries, topLimit, bottomLimit) {
+      const minGap = 28;
+      const rows = projected
+        .map((series, index) => ({
+          series,
+          index,
+          anchorY: yForSeries(series),
+          labelY: yForSeries(series)
+        }))
+        .sort((a, b) => a.labelY - b.labelY);
+
+      for (let i = 1; i < rows.length; i += 1) {
+        rows[i].labelY = Math.max(rows[i].labelY, rows[i - 1].labelY + minGap);
+      }
+
+      const overflow = rows[rows.length - 1].labelY - bottomLimit;
+      if (overflow > 0) {
+        rows.forEach((row) => {
+          row.labelY -= overflow;
+        });
+      }
+
+      for (let i = 0; i < rows.length; i += 1) {
+        if (rows[i].labelY < topLimit) {
+          const shift = topLimit - rows[i].labelY;
+          for (let j = i; j < rows.length; j += 1) {
+            rows[j].labelY += shift;
+          }
+        }
+      }
+
+      for (let i = 1; i < rows.length; i += 1) {
+        rows[i].labelY = Math.max(rows[i].labelY, rows[i - 1].labelY + minGap);
+      }
+
+      const finalOverflow = rows[rows.length - 1].labelY - bottomLimit;
+      if (finalOverflow > 0) {
+        rows.forEach((row) => {
+          row.labelY -= finalOverflow;
+        });
+      }
+
+      return rows.sort((a, b) => a.index - b.index);
+    }
+
+    function getChartValue(row) {
+      if (chartView === "fees") return row.cumulativeFees;
+      if (chartView === "gap") return row.gap;
+      return row.balance;
+    }
+
+    function getYAxisLabel() {
+      if (chartView === "fees") return "Cumulative fees paid";
+      if (chartView === "gap") return "Ending balance gap vs. no-fee baseline";
+      return "Projected account balance";
+    }
+
+    function updateChartTitle() {
+      const copy = {
+        balance: ["Projected Account Balance", "Same gross return, different fee drag."],
+        fees: ["Cumulative Fees Paid", "Asset-based and flat-dollar costs accumulate over time."],
+        gap: ["Gap Versus No-Fee Baseline", "Shows the account value lost to fees under each plan."]
+      };
+      els.chartHeading.textContent = copy[chartView][0];
+      els.chartSubtitle.textContent = copy[chartView][1];
+    }
+
+    function niceMax(value) {
+      if (value <= 0) return 1;
+      const magnitude = Math.pow(10, Math.floor(Math.log10(value)));
+      const normalized = value / magnitude;
+      const rounded = normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10;
+      return rounded * magnitude;
+    }
+
+    function makeTicks(min, max, count) {
+      return Array.from({ length: count + 1 }, (_, index) => min + ((max - min) / count) * index);
+    }
+
+    function makeYearTicks(years) {
+      const step = years <= 10 ? 1 : years <= 25 ? 5 : 10;
+      const ticks = [];
+      for (let year = 0; year <= years; year += step) {
+        ticks.push(year);
+      }
+      if (ticks[ticks.length - 1] !== years) ticks.push(years);
+      return ticks;
+    }
+
+    function formatAxisValue(value) {
+      return compactMoneyFormatter.format(value);
+    }
+
+    function renderOutputs() {
+      const projected = calculateScenario();
+      renderSummary(projected);
+      renderChart(projected);
+      renderLegend(projected);
+      renderResultsTable(projected);
+    }
+
+    function renderAll() {
+      sanitizeScenario();
+      renderScenarioInputs();
+      renderPlans();
+      renderSelectedPlanOptions();
+      renderScaleControl();
+      updateChartTitle();
+      renderOutputs();
+    }
+
+    function sanitizeScenario() {
+      scenario.startingBalance = clampNumber(scenario.startingBalance, 0, 100000000, 100000);
+      scenario.annualContribution = clampNumber(scenario.annualContribution, 0, 10000000, 12000);
+      scenario.annualReturnPercent = clampNumber(scenario.annualReturnPercent, -99, 99, 6);
+      scenario.years = Math.round(clampNumber(scenario.years, 1, 60, 40));
+      if (!scenario.plans.length) {
+        scenario.plans.push({
+          id: uid(),
+          name: "New Plan",
+          recordkeeper: "Recordkeeper",
+          isInnovestClient: false,
+          assetFeeBps: 50,
+          annualFlatFee: 75
+        });
+      }
+      scenario.plans = scenario.plans.map((plan) => ({
+        ...plan,
+        name: String(plan.name || "Untitled plan").slice(0, 80),
+        recordkeeper: String(plan.recordkeeper || "Recordkeeper").slice(0, 80),
+        assetFeeBps: clampNumber(plan.assetFeeBps, 0, 500, 0),
+        annualFlatFee: clampNumber(plan.annualFlatFee, 0, 1000000, 0),
+        isInnovestClient: Boolean(plan.isInnovestClient)
+      }));
+    }
+
+    function addPlan() {
+      const newPlan = {
+        id: uid(),
+        name: `Plan ${scenario.plans.length + 1}`,
+        recordkeeper: "Recordkeeper",
+        isInnovestClient: false,
+        assetFeeBps: 50,
+        annualFlatFee: 75
+      };
+      scenario.plans.push(newPlan);
+      selectedPlanId = newPlan.id;
+      renderAll();
+    }
+
+    function duplicatePlan(id) {
+      const plan = scenario.plans.find((item) => item.id === id);
+      if (!plan) return;
+      const clone = {
+        ...structuredClone(plan),
+        id: uid(),
+        name: `${plan.name} Copy`
+      };
+      scenario.plans.push(clone);
+      selectedPlanId = clone.id;
+      renderAll();
+    }
+
+    function deletePlan(id) {
+      if (scenario.plans.length <= 1) return;
+      scenario.plans = scenario.plans.filter((plan) => plan.id !== id);
+      if (selectedPlanId === id) {
+        selectedPlanId = scenario.plans[0].id;
+      }
+      renderAll();
+    }
+
+    function updatePlanField(id, field, value, type) {
+      const plan = scenario.plans.find((item) => item.id === id);
+      if (!plan) return;
+      if (type === "checkbox") {
+        plan[field] = Boolean(value);
+      } else if (field === "assetFeeBps" || field === "annualFlatFee") {
+        plan[field] = Number(value) || 0;
+      } else {
+        plan[field] = value;
+      }
+      selectedPlanId = id;
+      sanitizeScenario();
+      document.querySelectorAll("[data-plan-card]").forEach((card) => {
+        const cardPlan = scenario.plans.find((item) => item.id === card.dataset.planCard);
+        card.classList.toggle("selected", card.dataset.planCard === selectedPlanId);
+        card.classList.toggle("client", Boolean(cardPlan?.isInnovestClient));
+        const title = card.querySelector("[data-plan-title]");
+        if (title && cardPlan) title.textContent = cardPlan.name || "Untitled plan";
+      });
+      renderSelectedPlanOptions();
+      updateChartTitle();
+      renderOutputs();
+    }
+
+    function exportPdf() {
+      const projected = calculateScenario();
+      const chartSvg = els.chart.outerHTML;
+      const date = new Date().toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      });
+      const tableRows = projected.map((series) => {
+        const end = ending(series);
+        const plan = series.plan;
+        const status = plan.isBaseline ? "Baseline" : plan.isInnovestClient ? "Innovest client" : "Prospect";
+        return `
+          <tr>
+            <td>${escapeHtml(plan.name)}</td>
+            <td>${escapeHtml(status)}</td>
+            <td>${formatBps(plan.assetFeeBps)}</td>
+            <td>${formatMoney(plan.annualFlatFee || 0)}</td>
+            <td>${formatMoney(end.balance)}</td>
+            <td>${formatMoney(end.cumulativeFees)}</td>
+            <td>${formatMoney(end.gap)}</td>
+          </tr>
+        `;
+      }).join("");
+
+      const report = window.open("", "_blank", "width=1200,height=900");
+      if (!report) {
+        window.print();
+        return;
+      }
+
+      report.document.write(`
+        <!doctype html>
+        <html lang="en">
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <title>401(k) Fee Projector Report</title>
+          <style>
+            :root {
+              --bg: #ffffff;
+              --ink: #504D51;
+              --ink-strong: #221f23;
+              --ink-soft: #6e6c70;
+              --rule: #e3e1e2;
+              --bronze: #AF6828;
+              --teal: #008991;
+              --lime: #A5B438;
+            }
+            * { box-sizing: border-box; }
+            body {
+              margin: 0;
+              color: var(--ink);
+              background: var(--bg);
+              font-family: Calibri, Carlito, "Segoe UI", Arial, sans-serif;
+              font-size: 12.5px;
+              line-height: 1.35;
+            }
+            .report {
+              width: min(10.5in, calc(100% - 40px));
+              margin: 0 auto;
+              padding: 28px 0 36px;
+            }
+            header {
+              display: flex;
+              justify-content: space-between;
+              gap: 24px;
+              border-bottom: 2px solid var(--ink);
+              padding-bottom: 14px;
+              margin-bottom: 18px;
+            }
+            .eyebrow {
+              margin: 0 0 5px;
+              color: var(--bronze);
+              font-size: 10px;
+              font-weight: 700;
+              letter-spacing: .18em;
+              text-transform: uppercase;
+            }
+            h1 {
+              margin: 0 0 5px;
+              color: var(--ink-strong);
+              font-size: 26px;
+              line-height: 1.05;
+            }
+            h2 {
+              margin: 18px 0 8px;
+              border-bottom: 1px solid var(--rule);
+              color: var(--ink-strong);
+              font-size: 16px;
+              padding-bottom: 5px;
+            }
+            .meta {
+              color: var(--ink-soft);
+              font-size: 12px;
+              text-align: right;
+            }
+            .assumptions {
+              display: grid;
+              grid-template-columns: repeat(4, 1fr);
+              gap: 8px;
+              margin-bottom: 14px;
+            }
+            .assumption {
+              border: 1px solid var(--rule);
+              border-radius: 6px;
+              padding: 9px;
+            }
+            .label {
+              color: var(--ink-soft);
+              font-size: 10px;
+              font-weight: 700;
+              letter-spacing: .08em;
+              text-transform: uppercase;
+            }
+            .value {
+              margin-top: 3px;
+              color: var(--ink-strong);
+              font-size: 16px;
+              font-weight: 700;
+            }
+            .chart-box {
+              border: 1px solid var(--rule);
+              border-radius: 7px;
+              padding: 8px;
+              margin-bottom: 16px;
+            }
+            .chart-box svg {
+              display: block;
+              width: 100%;
+              height: auto;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              font-size: 11.5px;
+            }
+            th,
+            td {
+              border-bottom: 1px solid var(--rule);
+              padding: 7px 8px;
+              text-align: right;
+            }
+            th:first-child,
+            td:first-child,
+            th:nth-child(2),
+            td:nth-child(2) {
+              text-align: left;
+            }
+            th {
+              color: var(--ink-soft);
+              font-size: 10px;
+              letter-spacing: .07em;
+              text-transform: uppercase;
+            }
+            .disclaimer {
+              margin-top: 16px;
+              color: var(--ink-soft);
+              font-size: 11px;
+            }
+            @page { margin: .45in; }
+            @media print {
+              .report {
+                width: auto;
+                padding: 0;
+              }
+              body {
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <main class="report">
+            <header>
+              <div>
+                <p class="eyebrow">Innovest Portfolio Solutions</p>
+                <h1>401(k) Fee Projector</h1>
+                <div>Projected participant outcomes across recordkeeper fee assumptions.</div>
+              </div>
+              <div class="meta">
+                <strong>Report date</strong><br>${escapeHtml(date)}
+              </div>
+            </header>
+
+            <section class="assumptions" aria-label="Scenario assumptions">
+              <div class="assumption"><div class="label">Starting balance</div><div class="value">${formatMoney(scenario.startingBalance)}</div></div>
+              <div class="assumption"><div class="label">Annual contribution</div><div class="value">${formatMoney(scenario.annualContribution)}</div></div>
+              <div class="assumption"><div class="label">Gross return</div><div class="value">${Number(scenario.annualReturnPercent).toFixed(2)}%</div></div>
+              <div class="assumption"><div class="label">Projection</div><div class="value">${scenario.years} years</div></div>
+            </section>
+
+            <section>
+              <h2>${escapeHtml(els.chartHeading.textContent)}</h2>
+              <div class="chart-box">${chartSvg}</div>
+            </section>
+
+            <section>
+              <h2>Plan Fee Table</h2>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Plan</th>
+                    <th>Status</th>
+                    <th>Asset fee</th>
+                    <th>Flat fee</th>
+                    <th>Ending balance</th>
+                    <th>Cumulative fees</th>
+                    <th>Gap vs. no-fee</th>
+                  </tr>
+                </thead>
+                <tbody>${tableRows}</tbody>
+              </table>
+            </section>
+
+            <p class="disclaimer">For illustrative purposes only. Not investment advice.</p>
+          </main>
+          <script>
+            window.addEventListener("load", () => {
+              setTimeout(() => window.print(), 150);
+            });
+          <\/script>
+        </body>
+        </html>
+      `);
+      report.document.close();
+    }
+
+    function openAnimationModal() {
+      animationProjected = calculateScenario();
+      els.animationModal.hidden = false;
+      document.body.classList.add("modal-open");
+      replayAnimation();
+    }
+
+    function closeAnimationModal() {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = 0;
+      }
+      els.animationModal.hidden = true;
+      document.body.classList.remove("modal-open");
+      setAnimationStatus("");
+    }
+
+    function replayAnimation() {
+      if (els.animationModal.hidden) return;
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+      animationProjected = calculateScenario();
+      animationStartTime = performance.now();
+      setAnimationStatus("Previewing year 0.");
+      animationFrameId = requestAnimationFrame(renderAnimationPreview);
+    }
+
+    function renderAnimationPreview(now) {
+      const elapsed = now - animationStartTime;
+      if (elapsed < ANIMATION_REVEAL_MS) {
+        const progress = elapsed / ANIMATION_REVEAL_MS;
+        const options = getAnimationFrameOptions(animationProjected, progress);
+        renderChartToSvg(els.animationChart, animationProjected, options);
+        setAnimationStatus(`${options.yearLabel}.`);
+        animationFrameId = requestAnimationFrame(renderAnimationPreview);
+        return;
+      }
+
+      renderChartToSvg(els.animationChart, animationProjected, {
+        width: ANIMATION_WIDTH,
+        height: ANIMATION_HEIGHT
+      });
+      setAnimationStatus("Final chart preview.");
+
+      if (elapsed < ANIMATION_REVEAL_MS + ANIMATION_HOLD_MS) {
+        animationFrameId = requestAnimationFrame(renderAnimationPreview);
+      } else {
+        animationFrameId = 0;
+      }
+    }
+
+    async function downloadAnimatedExport() {
+      if (!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream) {
+        setAnimationStatus("Video export is not supported in this browser.");
+        return;
+      }
+
+      const mimeType = getSupportedVideoMimeType();
+      if (!mimeType) {
+        setAnimationStatus("This browser cannot create WebM video.");
+        return;
+      }
+
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = 0;
+      }
+
+      const projected = calculateScenario();
+      els.downloadAnimationButton.disabled = true;
+      els.replayAnimationButton.disabled = true;
+      setAnimationStatus("Rendering video 0%.");
+
+      try {
+        const blob = await recordAnimation(projected, mimeType);
+        downloadBlob(blob, getAnimationFileName());
+        renderChartToSvg(els.animationChart, projected, {
+          width: ANIMATION_WIDTH,
+          height: ANIMATION_HEIGHT
+        });
+        setAnimationStatus("Downloaded WebM.");
+      } catch (error) {
+        console.error(error);
+        setAnimationStatus("Video export failed. Preview is still available.");
+      } finally {
+        els.downloadAnimationButton.disabled = false;
+        els.replayAnimationButton.disabled = false;
+      }
+    }
+
+    async function recordAnimation(projected, mimeType) {
+      const canvas = document.createElement("canvas");
+      canvas.width = ANIMATION_WIDTH;
+      canvas.height = ANIMATION_HEIGHT;
+      const stream = canvas.captureStream(ANIMATION_FPS);
+      const recorder = new MediaRecorder(stream, { mimeType });
+      const chunks = [];
+      const totalMs = ANIMATION_REVEAL_MS + ANIMATION_HOLD_MS;
+      const frameDuration = 1000 / ANIMATION_FPS;
+      const totalFrames = Math.ceil(totalMs / frameDuration);
+      const videoTrack = stream.getVideoTracks()[0];
+
+      const completed = new Promise((resolve, reject) => {
+        recorder.ondataavailable = (event) => {
+          if (event.data && event.data.size) chunks.push(event.data);
+        };
+        recorder.onerror = () => reject(recorder.error || new Error("Video recorder error"));
+        recorder.onstop = () => resolve(new Blob(chunks, { type: mimeType }));
+      });
+
+      recorder.start();
+
+      try {
+        for (let frame = 0; frame <= totalFrames; frame += 1) {
+          const elapsed = Math.min(frame * frameDuration, totalMs);
+          const options = elapsed < ANIMATION_REVEAL_MS
+            ? getAnimationFrameOptions(projected, elapsed / ANIMATION_REVEAL_MS)
+            : { width: ANIMATION_WIDTH, height: ANIMATION_HEIGHT };
+
+          await drawAnimationCanvasFrame(canvas, projected, options);
+          if (videoTrack && typeof videoTrack.requestFrame === "function") {
+            videoTrack.requestFrame();
+          }
+          if (frame % 10 === 0 || frame === totalFrames) {
+            setAnimationStatus(`Rendering video ${Math.round((frame / totalFrames) * 100)}%.`);
+          }
+          await wait(frameDuration);
+        }
+      } catch (error) {
+        if (recorder.state !== "inactive") recorder.stop();
+        stream.getTracks().forEach((track) => track.stop());
+        throw error;
+      }
+
+      recorder.stop();
+      const blob = await completed;
+      stream.getTracks().forEach((track) => track.stop());
+      return blob;
+    }
+
+    async function drawAnimationCanvasFrame(canvas, projected, options) {
+      const context = canvas.getContext("2d");
+      context.fillStyle = "#ffffff";
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      const svgMarkup = getChartSvgMarkup(projected, options);
+      await drawSvgToCanvas(context, canvas, svgMarkup);
+    }
+
+    function drawSvgToCanvas(context, canvas, svgMarkup) {
+      return new Promise((resolve, reject) => {
+        const image = new Image();
+        const url = URL.createObjectURL(new Blob([svgMarkup], { type: "image/svg+xml;charset=utf-8" }));
+        image.onload = () => {
+          context.drawImage(image, 0, 0, canvas.width, canvas.height);
+          URL.revokeObjectURL(url);
+          resolve();
+        };
+        image.onerror = () => {
+          URL.revokeObjectURL(url);
+          reject(new Error("Could not render animation frame"));
+        };
+        image.src = url;
+      });
+    }
+
+    function getSupportedVideoMimeType() {
+      const candidates = [
+        "video/webm;codecs=vp9",
+        "video/webm;codecs=vp8",
+        "video/webm"
+      ];
+      return candidates.find((type) => MediaRecorder.isTypeSupported(type));
+    }
+
+    function downloadBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function getAnimationFileName() {
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, "0");
+      const dd = String(today.getDate()).padStart(2, "0");
+      return `401k-fee-projector-animation-${yyyy}-${mm}-${dd}.webm`;
+    }
+
+    function setAnimationStatus(message) {
+      els.animationStatus.textContent = message;
+    }
+
+    function wait(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function escapeAttribute(value) {
+      return escapeHtml(value).replace(/`/g, "&#096;");
+    }
+
+    function escapeSvg(value) {
+      return escapeHtml(value);
+    }
+
+    document.addEventListener("input", (event) => {
+      const target = event.target;
+      if (target.matches("[data-scenario]")) {
+        scenario[target.dataset.scenario] = Number(target.value);
+        sanitizeScenario();
+        updateChartTitle();
+        renderOutputs();
+      }
+      if (target.matches("[data-plan-field]")) {
+        updatePlanField(target.dataset.id, target.dataset.planField, target.type === "checkbox" ? target.checked : target.value, target.type);
+      }
+    });
+
+    document.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-action]");
+      if (!button) return;
+      const id = button.dataset.id;
+      if (button.dataset.action === "select-plan") {
+        selectedPlanId = id;
+        renderAll();
+      }
+      if (button.dataset.action === "duplicate-plan") {
+        duplicatePlan(id);
+      }
+      if (button.dataset.action === "delete-plan") {
+        deletePlan(id);
+      }
+    });
+
+    document.querySelectorAll("[data-view]").forEach((button) => {
+      button.addEventListener("click", () => {
+        chartView = button.dataset.view;
+        document.querySelectorAll("[data-view]").forEach((item) => {
+          item.classList.toggle("active", item.dataset.view === chartView);
+          item.setAttribute("aria-selected", String(item.dataset.view === chartView));
+        });
+        renderAll();
+      });
+    });
+
+    document.getElementById("addPlanButton").addEventListener("click", addPlan);
+    document.getElementById("resetButton").addEventListener("click", () => {
+      scenario = structuredClone(defaultScenario);
+      selectedPlanId = scenario.plans[0].id;
+      chartView = "balance";
+      balanceYAxisFocus = 55;
+      document.querySelectorAll("[data-view]").forEach((item) => {
+        item.classList.toggle("active", item.dataset.view === chartView);
+        item.setAttribute("aria-selected", String(item.dataset.view === chartView));
+      });
+      renderAll();
+    });
+    document.getElementById("exportButton").addEventListener("click", exportPdf);
+    els.animatedExportButton.addEventListener("click", openAnimationModal);
+    els.closeAnimationButton.addEventListener("click", closeAnimationModal);
+    els.replayAnimationButton.addEventListener("click", replayAnimation);
+    els.downloadAnimationButton.addEventListener("click", downloadAnimatedExport);
+    els.animationModal.addEventListener("click", (event) => {
+      if (event.target === els.animationModal) closeAnimationModal();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !els.animationModal.hidden) {
+        closeAnimationModal();
+      }
+    });
+    els.selectedPlan.addEventListener("change", (event) => {
+      selectedPlanId = event.target.value;
+      renderAll();
+    });
+    els.balanceFocus.addEventListener("input", (event) => {
+      balanceYAxisFocus = Math.round(clampNumber(event.target.value, 0, 100, 55));
+      renderScaleControl();
+      renderOutputs();
+    });
+
+    renderAll();
+  </script>
+</body>
+</html>
