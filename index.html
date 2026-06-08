@@ -740,7 +740,7 @@
 
     .export-dialog {
       width: min(560px, 100%);
-      grid-template-rows: auto auto auto;
+      grid-template-rows: auto minmax(0, 1fr) auto;
     }
 
     .animation-head {
@@ -769,6 +769,8 @@
     .export-body {
       display: grid;
       gap: 16px;
+      min-height: 0;
+      overflow: auto;
       padding: 16px;
       background: #ffffff;
     }
@@ -785,6 +787,10 @@
     }
 
     .export-check-grid.categories {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .export-check-grid.columns {
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
@@ -907,7 +913,8 @@
       }
 
       .export-check-grid,
-      .export-check-grid.categories {
+      .export-check-grid.categories,
+      .export-check-grid.columns {
         grid-template-columns: 1fr;
       }
 
@@ -1152,6 +1159,39 @@
             </label>
           </div>
         </section>
+        <section class="export-group" aria-labelledby="exportColumnsTitle">
+          <h3 class="panel-title" id="exportColumnsTitle">Table Columns</h3>
+          <div class="export-check-grid columns">
+            <label class="export-check" for="exportColumnPlan">
+              <input id="exportColumnPlan" type="checkbox" data-export-column="plan" checked>
+              Plan
+            </label>
+            <label class="export-check" for="exportColumnStatus">
+              <input id="exportColumnStatus" type="checkbox" data-export-column="status" checked>
+              Status
+            </label>
+            <label class="export-check" for="exportColumnAssetFee">
+              <input id="exportColumnAssetFee" type="checkbox" data-export-column="assetFee" checked>
+              Asset fee
+            </label>
+            <label class="export-check" for="exportColumnFlatFee">
+              <input id="exportColumnFlatFee" type="checkbox" data-export-column="flatFee" checked>
+              Flat fee
+            </label>
+            <label class="export-check" for="exportColumnEndingBalance">
+              <input id="exportColumnEndingBalance" type="checkbox" data-export-column="endingBalance" checked>
+              Ending balance
+            </label>
+            <label class="export-check" for="exportColumnCumulativeFees">
+              <input id="exportColumnCumulativeFees" type="checkbox" data-export-column="cumulativeFees" checked>
+              Cumulative fees
+            </label>
+            <label class="export-check" for="exportColumnGap">
+              <input id="exportColumnGap" type="checkbox" data-export-column="gap" checked>
+              Gap vs. no-fee
+            </label>
+          </div>
+        </section>
       </div>
       <div class="animation-actions">
         <button class="btn" type="button" id="cancelExportButton">Cancel</button>
@@ -1291,6 +1331,51 @@
     function formatBps(value) {
       return `${Number(value || 0).toLocaleString("en-US", { maximumFractionDigits: 1 })} bps`;
     }
+
+    const EXPORT_TABLE_COLUMNS = [
+      {
+        key: "plan",
+        label: "Plan",
+        className: "text-column",
+        value: (series) => escapeHtml(series.plan.name)
+      },
+      {
+        key: "status",
+        label: "Status",
+        className: "text-column",
+        value: (series) => escapeHtml(getPlanStatusLabel(series.plan))
+      },
+      {
+        key: "assetFee",
+        label: "Asset fee",
+        className: "numeric-column",
+        value: (series) => formatBps(series.plan.assetFeeBps)
+      },
+      {
+        key: "flatFee",
+        label: "Flat fee",
+        className: "numeric-column",
+        value: (series) => formatMoney(series.plan.annualFlatFee || 0)
+      },
+      {
+        key: "endingBalance",
+        label: "Ending balance",
+        className: "numeric-column",
+        value: (series) => formatMoney(ending(series).balance)
+      },
+      {
+        key: "cumulativeFees",
+        label: "Cumulative fees",
+        className: "numeric-column",
+        value: (series) => formatMoney(ending(series).cumulativeFees)
+      },
+      {
+        key: "gap",
+        label: "Gap vs. no-fee",
+        className: "numeric-column",
+        value: (series) => formatMoney(ending(series).gap)
+      }
+    ];
 
     function projectPlan(plan, settings) {
       const years = Math.round(clampNumber(settings.years, 1, 60, 40));
@@ -2012,6 +2097,15 @@
           baseline: showNoFeeBaseline,
           innovest: true,
           prospect: true
+        },
+        columns: {
+          plan: true,
+          status: true,
+          assetFee: true,
+          flatFee: true,
+          endingBalance: true,
+          cumulativeFees: true,
+          gap: true
         }
       };
     }
@@ -2023,6 +2117,9 @@
       document.querySelectorAll("[data-export-category]").forEach((input) => {
         input.checked = Boolean(options.categories[input.dataset.exportCategory]);
       });
+      document.querySelectorAll("[data-export-column]").forEach((input) => {
+        input.checked = Boolean(options.columns[input.dataset.exportColumn]);
+      });
     }
 
     function getExportOptionsFromForm() {
@@ -2033,18 +2130,33 @@
           baseline: Boolean(document.querySelector('[data-export-category="baseline"]')?.checked),
           innovest: Boolean(document.querySelector('[data-export-category="innovest"]')?.checked),
           prospect: Boolean(document.querySelector('[data-export-category="prospect"]')?.checked)
+        },
+        columns: {
+          plan: Boolean(document.querySelector('[data-export-column="plan"]')?.checked),
+          status: Boolean(document.querySelector('[data-export-column="status"]')?.checked),
+          assetFee: Boolean(document.querySelector('[data-export-column="assetFee"]')?.checked),
+          flatFee: Boolean(document.querySelector('[data-export-column="flatFee"]')?.checked),
+          endingBalance: Boolean(document.querySelector('[data-export-column="endingBalance"]')?.checked),
+          cumulativeFees: Boolean(document.querySelector('[data-export-column="cumulativeFees"]')?.checked),
+          gap: Boolean(document.querySelector('[data-export-column="gap"]')?.checked)
         }
       };
+    }
+
+    function getSelectedExportColumns(columns) {
+      return EXPORT_TABLE_COLUMNS.filter((column) => Boolean(columns[column.key]));
     }
 
     function validateExportOptions() {
       const options = getExportOptionsFromForm();
       const hasContent = options.includeChart || options.includeTable;
+      const hasTableColumns = !options.includeTable || getSelectedExportColumns(options.columns).length > 0;
       const matchingSeries = filterProjectedByCategories(calculateScenario(), options.categories);
-      const isValid = hasContent && matchingSeries.length > 0;
+      const isValid = hasContent && hasTableColumns && matchingSeries.length > 0;
       els.runExportButton.disabled = !isValid;
       els.exportStatus.textContent = !hasContent
         ? "Choose chart or table."
+        : !hasTableColumns ? "Choose at least one table column."
         : matchingSeries.length ? "" : "Choose a category with data.";
       return isValid;
     }
@@ -2064,29 +2176,20 @@
 
     function exportPdf(options) {
       const projected = filterProjectedByCategories(calculateScenario(), options.categories);
-      if (!projected.length || (!options.includeChart && !options.includeTable)) return;
+      const tableColumns = getSelectedExportColumns(options.columns);
+      if (!projected.length || (!options.includeChart && !options.includeTable) || (options.includeTable && !tableColumns.length)) return;
       const chartSvg = options.includeChart ? getChartSvgMarkup(projected, { height: 560 }) : "";
       const date = new Date().toLocaleDateString("en-US", {
         year: "numeric",
         month: "long",
         day: "numeric"
       });
-      const tableRows = projected.map((series) => {
-        const end = ending(series);
-        const plan = series.plan;
-        const status = getPlanStatusLabel(plan);
-        return `
+      const tableHeaders = tableColumns.map((column) => `<th class="${column.className}">${escapeHtml(column.label)}</th>`).join("");
+      const tableRows = projected.map((series) => `
           <tr>
-            <td>${escapeHtml(plan.name)}</td>
-            <td>${escapeHtml(status)}</td>
-            <td>${formatBps(plan.assetFeeBps)}</td>
-            <td>${formatMoney(plan.annualFlatFee || 0)}</td>
-            <td>${formatMoney(end.balance)}</td>
-            <td>${formatMoney(end.cumulativeFees)}</td>
-            <td>${formatMoney(end.gap)}</td>
+            ${tableColumns.map((column) => `<td class="${column.className}">${column.value(series)}</td>`).join("")}
           </tr>
-        `;
-      }).join("");
+        `).join("");
 
       const chartSection = options.includeChart ? `
             <section>
@@ -2100,15 +2203,7 @@
               <h2>Plan Fee Table</h2>
               <table>
                 <thead>
-                  <tr>
-                    <th>Plan</th>
-                    <th>Status</th>
-                    <th>Asset fee</th>
-                    <th>Flat fee</th>
-                    <th>Ending balance</th>
-                    <th>Cumulative fees</th>
-                    <th>Gap vs. no-fee</th>
-                  </tr>
+                  <tr>${tableHeaders}</tr>
                 </thead>
                 <tbody>${tableRows}</tbody>
               </table>
@@ -2234,11 +2329,11 @@
               padding: 7px 8px;
               text-align: right;
             }
-            th:first-child,
-            td:first-child,
-            th:nth-child(2),
-            td:nth-child(2) {
+            .text-column {
               text-align: left;
+            }
+            .numeric-column {
+              text-align: right;
             }
             th {
               color: var(--ink-soft);
@@ -2578,7 +2673,7 @@
       showNoFeeBaseline = event.target.checked;
       renderOutputs();
     });
-    document.querySelectorAll("[data-export-content], [data-export-category]").forEach((input) => {
+    document.querySelectorAll("[data-export-content], [data-export-category], [data-export-column]").forEach((input) => {
       input.addEventListener("change", validateExportOptions);
     });
     els.closeExportButton.addEventListener("click", closeExportModal);
