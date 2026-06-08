@@ -1115,7 +1115,7 @@
           </div>
         </section>
 
-        <p class="fine-print">For illustrative purposes only. Not investment advice.</p>
+        <p class="fine-print">Assumes monthly contributions and monthly fee deductions. For illustrative purposes only. Not investment advice.</p>
       </section>
     </section>
   </main>
@@ -1220,6 +1220,7 @@
     </div>
   </div>
 
+  <script src="fee-math.js"></script>
   <script>
     const NON_INNOVEST_SERIES = ["#7A767B", "#9A969B", "#B8B3B7", "#6E6C70", "#C8C3C6"];
     const INNOVEST_SERIES = ["#AF6828", "#C98942", "#D98A3D", "#8D5218", "#D7B393"];
@@ -1378,62 +1379,16 @@
     ];
 
     function projectPlan(plan, settings) {
-      const years = Math.round(clampNumber(settings.years, 1, 60, 40));
-      let balance = Math.max(0, Number(settings.startingBalance) || 0);
-      let cumulativeFees = 0;
-      const rows = [{ year: 0, balance, cumulativeFees, gap: 0 }];
-      const monthlyReturn = Math.pow(1 + ((Number(settings.annualReturnPercent) || 0) / 100), 1 / 12) - 1;
-      const monthlyContribution = Math.max(0, Number(settings.annualContribution) || 0) / 12;
-      const monthlyAssetFee = Math.max(0, Number(plan.assetFeeBps) || 0) / 10000 / 12;
-      const monthlyFlatFee = Math.max(0, Number(plan.annualFlatFee) || 0) / 12;
-
-      for (let month = 1; month <= years * 12; month += 1) {
-        balance = Math.max(0, balance * (1 + monthlyReturn));
-        balance += monthlyContribution;
-        const assetFee = balance * monthlyAssetFee;
-        const totalFee = Math.min(balance, assetFee + monthlyFlatFee);
-        balance = Math.max(0, balance - totalFee);
-        cumulativeFees += totalFee;
-
-        if (month % 12 === 0) {
-          rows.push({
-            year: month / 12,
-            balance,
-            cumulativeFees,
-            gap: 0
-          });
-        }
-      }
-
-      return rows;
+      return FeeMath.projectPlan(plan, settings);
     }
 
     function calculateScenario() {
-      const baselinePlan = {
-        id: "baseline",
-        name: "No-fee baseline",
-        recordkeeper: "No fees",
-        isBaseline: true,
-        isInnovestClient: false,
-        assetFeeBps: 0,
-        annualFlatFee: 0
-      };
-      const allPlans = [baselinePlan, ...scenario.plans];
-      const projected = allPlans.map((plan) => ({
-        plan,
-        color: getPlanColor(plan, allPlans),
-        data: projectPlan(plan, scenario)
+      const projected = FeeMath.calculateScenario(scenario);
+      const allPlans = projected.map((series) => series.plan);
+      return projected.map((series) => ({
+        ...series,
+        color: getPlanColor(series.plan, allPlans)
       }));
-      const baseline = projected[0];
-
-      projected.forEach((series) => {
-        series.data = series.data.map((row, index) => ({
-          ...row,
-          gap: baseline.data[index].balance - row.balance
-        }));
-      });
-
-      return projected;
     }
 
     function getDisplayProjected(projected) {
@@ -1505,7 +1460,7 @@
             <div class="field">
               <label for="bps-${plan.id}">Asset fee</label>
               <div class="input-suffix">
-                <input id="bps-${plan.id}" data-plan-field="assetFeeBps" data-id="${plan.id}" type="number" min="0" max="500" step="1" value="${Number(plan.assetFeeBps) || 0}">
+                <input id="bps-${plan.id}" data-plan-field="assetFeeBps" data-id="${plan.id}" type="number" min="0" max="500" step="0.1" value="${Number(plan.assetFeeBps) || 0}">
                 <span>bps</span>
               </div>
             </div>
